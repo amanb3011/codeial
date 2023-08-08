@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html class="no-js">
+<html>
+    <head>
+        <title> 
+            <%= title %>
+        </title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/css/layout.css"> 
+        <!-- as the root directory assts is already mentioned in index.js wahan se relative addrss -->
+        <%- style %>
+        <!-- if a style tag is passed in body it comes here-->
+    </head>
+    <body>
+        <%- include('_header'); %>
+            
+            <%- body %>
+
+        <%- include('_footer'); %>
+        <%- script %>
+        <!-- if a script tag is passed in body it comes here-->
+    </head>
+    </body>
+</html>
