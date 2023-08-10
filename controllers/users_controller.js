@@ -1,12 +1,27 @@
 const User = require('../models/user');
 
 
-module.exports.profile = function(req, res){
-    return res.render('user_profile', {
-        title: 'User Profile'
-    })
-}
+module.exports.profile = async function(req, res) {
+    try {
+        if (req.cookies.user_id) { // to check if user direct profile jaane ki kosish to ni kar raha without sign in(sidha url tpe krke)
+            const user = await User.findById(req.cookies.user_id).exec();// if yes to find that user
 
+            if (user) {
+                return res.render('user_profile', {
+                    title: 'User Profile',
+                    user: user
+                });
+            }
+
+            return res.redirect('/users/sign-in');
+        } else {
+            return res.redirect('/users/sign-in');
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'Server Error' });
+    }
+};
 
 // render the sign up page
 module.exports.signUp = function(req, res){
@@ -48,6 +63,7 @@ module.exports.create = async function(req, res) {
 };
 
 // sign in and create a session for the user
-module.exports.createSession = function(req, res){
-    // TODO later
+module.exports.createSession = async function(req, res){
+
+  //todolater
 }
