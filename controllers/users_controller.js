@@ -1,30 +1,17 @@
 const User = require('../models/user');
 
 
-module.exports.profile = async function(req, res) {
-    try {
-        if (req.cookies.user_id) { // to check if user direct profile jaane ki kosish to ni kar raha without sign in(sidha url tpe krke)
-            const user = await User.findById(req.cookies.user_id).exec();// if yes to find that user
-
-            if (user) {
-                return res.render('user_profile', {
-                    title: 'User Profile',
-                    user: user
-                });
-            }
-
-            return res.redirect('/users/sign-in');
-        } else {
-            return res.redirect('/users/sign-in');
-        }
-    } catch (err) {
-        console.error('Error:', err);
-        return res.status(500).json({ message: 'Server Error' });
-    }
-};
+module.exports.profile = function(req, res){
+    return res.render('user_profile', {
+        title: 'User Profile'
+    })
+}
 
 // render the sign up page
 module.exports.signUp = function(req, res){
+    if(req.isAuthenticated()){
+        return res.redirect('/users/profile')
+    }
     return res.render('user_sign_up', {
         title: "Codeial | Sign Up"
     })
@@ -33,6 +20,9 @@ module.exports.signUp = function(req, res){
 
 // render the sign in page
 module.exports.signIn = function(req, res){
+    if(req.isAuthenticated()){
+        return res.redirect('/users/profile')
+    }
     return res.render('user_sign_in', {
         title: "Codeial | Sign In"
     })
@@ -63,7 +53,16 @@ module.exports.create = async function(req, res) {
 };
 
 // sign in and create a session for the user
-module.exports.createSession = async function(req, res){
+module.exports.createSession = function(req, res){
+    return res.redirect('/');
+}
 
-  //todolater
+module.exports.destroySession = function(req, res){
+    req.logout(function(err) {
+        if (err) {
+            console.error('Error:', err);
+            return res.status(500).json({ message: 'Server Error' });
+        }
+        return res.redirect('/');
+    });
 }
