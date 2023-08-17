@@ -2,25 +2,38 @@ const Comment = require('../models/comment');
 const Post = require('../models/post');
 
 module.exports.create = async function(req, res) {
-    try {
-        console.log(req.body.post);
-        const post = await Post.findById(req.body.post);
+    try{
+        let post = await Post.findById(req.body.post);
 
-        if (post) {
-            const comment = await Comment.create({
+        if (post){
+            let comment = await Comment.create({
                 content: req.body.content,
                 post: req.body.post,
                 user: req.user._id
             });
 
-            if (comment) {
-                post.comments.push(comment);
-                post.save();
+            post.comments.push(comment);
+            post.save();
 
-                return res.redirect('/');
+            if (req.xhr){
+                // Similar for comments to fetch the user's id!
+                comment = await Comment.findById(comment._id).populate('user', 'name').exec();
+
+                return res.status(200).json({
+                    data: {
+                        comment: comment
+                    },
+                    message: "Post created!"
+                });
             }
+
+
+            req.flash('success', 'Comment published!');
+
+            res.redirect('/');
         }
-    } catch (err) {
+    }
+     catch (err) {
         console.log('Error creating comment:', err);
         return res.status(500).json({ message: 'Error creating comment' });
     }
@@ -38,6 +51,15 @@ module.exports.destroy = async function(req, res) {
             await Post.findByIdAndUpdate(comment.post, { $pull: { comments: req.params.id }});
 
             await Comment.deleteOne({ _id: req.params.id });
+
+            if (req.xhr){
+                return res.status(200).json({
+                    data: {
+                        comment_id: req.params.id
+                    },
+                    message: "Post deleted"
+                });
+            }
 
             return res.redirect('back');
         } else {

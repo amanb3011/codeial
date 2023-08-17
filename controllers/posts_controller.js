@@ -3,11 +3,21 @@ const Comment = require('../models/comment');
 
 module.exports.create = async function(req, res) {
     try {
-        const created = await Post.create({
+         let post = await Post.create({
             content: req.body.content,
             user: req.user._id
         });
-        if (created) {
+        if(req.xhr){ // add hogye hai database me but home screeen pe nhi dikhenge jab tak refresh na karo coz return kargye is function se
+           post = await Post.findById(post._id).populate('user','name').exec();
+           
+            return res.status(200).json({
+                data: {
+                    post: post
+                },
+                message: "post created"
+            });
+        }
+        if (post) {
             return res.redirect('back');
         }
     } catch (err) {
@@ -21,9 +31,21 @@ module.exports.destroy = async function(req, res){
         const post = await Post.findById(req.params.id);
 
         if (post.user == req.user.id) {
-            await Post.deleteOne({ _id: req.params.id });
+
+            await Post.deleteOne({ _id: req.params.id });//remove function is depricated
 
             await Comment.deleteMany({ post: req.params.id });
+
+            
+            
+            if(req.xhr){
+                return res.status(200).json({
+                    data:{
+                        post_id:req.params.id
+                    },
+                    message:"post deleted"
+                });
+            }
 
             return res.redirect('back');
         } else {
